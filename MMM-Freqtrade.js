@@ -22,9 +22,9 @@ Module.register("MMM-FreqtradeAPI", {
 
     notificationReceived(notification, payload, sender) {
         if (notification === 'MODULE_DOM_CREATED') {
-            this.getJoke();
+            this.getToken();
             setInterval(() => {
-                this.getFreqData()
+                this.getState()
             }, this.config.fetchInterval);
         }
     },
@@ -38,25 +38,10 @@ Module.register("MMM-FreqtradeAPI", {
         return wrapper;
     },
     setupHTMLStructure(wrapper) {
-        if (this.result.type === 'single') {
-
             const result = document.createElement("h1");
             result.className = "bright medium light fadeIn";
             result.innerHTML = this.result.result;
             wrapper.appendChild(result);
-
-        } else if (this.result.type === 'twopart') {
-
-            const setup = document.createElement("h1");
-            setup.className = "bright medium light no-wrap fadeIn";
-            setup.innerHTML = this.result.setup;
-            wrapper.appendChild(result);
-
-            const sec_line = document.createElement("h2");
-            sec_line.className = "bright small light fadeIn";
-            sec_line.innerHTML = this.result.delivery;
-            wrapper.appendChild(sec_line);
-        }
     },
     getToken() {
         fetch(`${this.config.freqtrade_url}/api/v1/token/login`, {
