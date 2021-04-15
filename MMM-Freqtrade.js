@@ -1,5 +1,5 @@
 // Define Plugin defaults
-Module.register("MMM-FreqtradeAPI", {
+Module.register("MMM-Freqtrade", {
     defaults: {
         freqtrade_url: "have you",
         freqtrade_user: "read",
@@ -7,69 +7,70 @@ Module.register("MMM-FreqtradeAPI", {
         freqtrade_state: "ReadMe",
         fetchInterval: 600000
     },
-// END Plugin defaults
 
-// Define global vars
+    getDom: function()
+        {
+            var wrapper = document.createElement("div");
+            wrapper.id ="MMM-Freqtrade";
+            this.setupHTMLStructure(wrapper);
+            return wrapper;
+        },
+
     result: "",
     login_token: "",
-// END global vars
 
-    getStyles() {
+    getStyles: function() {
         return [
             this.file('style.css')
         ]
     },
 
-    notificationReceived(notification, payload, sender) {
+    notificationReceived: function(notification, payload, sender) {
         if (notification === 'MODULE_DOM_CREATED') {
             this.getToken();
             setInterval(() => {
-                this.getState()
+                this.getToken()
             }, this.config.fetchInterval);
         }
     },
-    getDom() {
-        const wrapper = document.createElement("div");
 
-        if(this.result === null) return wrapper;
-
-        this.setupHTMLStructure(wrapper);
-
-        return wrapper;
-    },
-    setupHTMLStructure(wrapper) {
+    setupHTMLStructure: function(wrapper) {
             const result = document.createElement("h1");
             result.className = "bright medium light fadeIn";
-            result.innerHTML = this.result.result;
-            wrapper.appendChild(result);
+            for(trade in this.result.trades) {
+		trade = this.result.trades[trade]
+                out = document.createElement('p');
+                wrapper.appendChild(out);
+                out.appendChild(document.createTextNode(trade.pair + ", " + trade.profit_pct + "% (" + trade.open_date + ")"))
+            }
     },
-    getToken() {
+    getToken: function() {
         fetch(`${this.config.freqtrade_url}/api/v1/token/login`, {
             method: 'POST',
             cache: 'no-cache',
             headers: {
                 "Content-Type": "text/plain",
-                'Authorization': 'Basic ' + btoa(`${this.config.freqtrade_username}` + ":" + `${this.config.freqtrade_password}`),
+                'Authorization': 'Basic ' + btoa(`${this.config.freqtrade_user}` + ":" + `${this.config.freqtrade_password}`),
             }
         }).then((response) => {
-            response.json.parse("access_token").then((login_token) => {
-                this.login_token = login_token;
-                console.log(login_token)
+            response.json().then((login_token) => {
+                this.login_token = login_token['access_token'];
+                this.getState()
             });
         });
     },
-    getState() {
+    getState: function() {
+        console.log("getState()")
         fetch(`${this.config.freqtrade_url}/api/v1/${this.config.category}`, {
-            method: 'POST',
+            method: 'GET',
             cache: 'no-cache',
             headers: {
                 "Content-Type": "text/plain",
-                "Authorization": `Bearer ${access_token}`
+                "Authorization": `Bearer ${this.login_token}`
             }
         }).then((response) => {
             response.json().then((result) => {
                 this.result = result;
-                console.log(result);
                 this.updateDom();
             });
         });
