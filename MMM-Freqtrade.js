@@ -12,11 +12,20 @@ Module.register("MMM-Freqtrade", {
         {
             var wrapper = document.createElement("div");
             wrapper.id ="MMM-Freqtrade";
+
+            var table = document.createElement("table");
+            var tbody = document.createElement("tbody")
+
+            table.appendChild(tbody)
+            tbody.appendChild(trow);
+            wrapper.appendChild(table);
+
             this.setupHTMLStructure(wrapper);
             return wrapper;
         },
 
     // define global vars
+    trow = document.createElement("TR"),
     result: "",
     login_token: "",
 
@@ -85,9 +94,10 @@ Module.register("MMM-Freqtrade", {
             else if (this.config.freqtrade_category == "performance") {
                 for(performance in this.result) {
 		            performance = this.result[performance];
-                    out = document.createElement('p');
-                    wrapper.appendChild(out);
-                    out.appendChild(document.createTextNode(performance.pair + ", " + performance.profit + "," + performance.count));
+                    table_data = document.createElement("TD");
+                    table_insert = document.createTextNode(performance.pair + ", " + performance.profit + "," + performance.count)
+                    table_data.appendChild(table_insert);
+                    trow.appendChild(table_data);
                     console.log(this.name + ": " + "wrapping up data for `performance`");
                 }
              }
