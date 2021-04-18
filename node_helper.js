@@ -1,10 +1,21 @@
 var NodeHelper = require("node_helper")
 
 module.exports = NodeHelper.create({
-    start: function() {
-        this.config = null;
-        this.initial = true;
-        this.isrunning = false;
+
+	start: function () {
+		console.log('MMM-JsonTable helper started...');
+	},
+
+	socketNotificationReceived: function (notification, payload) 
+    {
+        console.log("MMM-Freqtrade:"+ " " + "NOTIFICATION ARRIVED");
+        var self = this;
+        if (notification === "MMM-Freqtrade_RESULT") 
+        {
+            this.jsonData = payload;
+            console.log(this.jsonData);
+        }
+
     },
 
     log: function (msg) {
