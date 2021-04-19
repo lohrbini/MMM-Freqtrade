@@ -18,6 +18,7 @@ Module.register("MMM-Freqtrade", {
     {
         this.getToken();
         this.scheduleUpdate();
+        this.loaded = true;
 	},
 
 	scheduleUpdate: function ()
@@ -25,17 +26,19 @@ Module.register("MMM-Freqtrade", {
 		var self = this;
 		setInterval(function () { self.getState(); }, this.config.fetchInterval);
         setInterval(function () { self.getToken() }, this.config.freqtrade_update_token);
+        setInterval(function() { self.updateDom()}, this.config.fetchInterval);
 	},
 
     getDom: function()
         {
             var wrapper = document.createElement("div");
+            wrapper.className = "wrapper"
             
-            var table = document.createElement("table");
-            var tbody = document.createElement("tbody");
+            var table = document.createElement('table');
+            var tablerow, tabledata;
 
-            // fill array with jsonData items
-            var items = [];           
+
+            var items = [];
             for (var i = 0; i < jsonData.length; i++)
             {
                 var object = jsonData[i];
@@ -46,25 +49,31 @@ Module.register("MMM-Freqtrade", {
             }
 
             // display "maintenance" if there is no data available
-            if (!(items instanceof Array || typeof jsonData === 'undefined' || jsonData === 'null')) {
+            if (!(jsonData instanceof Array || typeof jsonData === 'undefined' || jsonData === 'null')) 
+            {
                 wrapper.innerHTML = "Awaiting Freqtrade data..";
                 return wrapper;
-            }
-
-
-            console.log("items:" + items);
-
-            items.forEach(element => 
+            } 
+            // return the formatted data in a table
+            else
+            {
+                for (var i = 0; i <= items.length; i++) 
                 {
-                    var row = this.getTableRow(element);
-                    tbody.appendChild(row);
-                }),
-
-            table.appendChild(tbody);
-            wrapper.appendChild(table);
-
-            return wrapper;
+                    if(this.config.freqtrade_category === "performance")
+                    {
+                        if (i % 3 === 0)
+                        {
+                            tablerow = table.insertRow();
+                        }
+                        tabledata = tablerow.insertCell();
+                        tabledata.appendChild(document.createTextNode(items[i]));
+                    }
+                }
+                wrapper.appendChild(table);
+                return wrapper;
+            }
         },
+
 
         getTableRow: function(jsonObject) 
         {
