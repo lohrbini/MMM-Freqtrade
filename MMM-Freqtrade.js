@@ -36,7 +36,20 @@ Module.register("MMM-Freqtrade", {
 
             var items = [];
 
-            items = this.result;
+            items = jsonData;
+
+            // for (item in jsonData) {
+            //     item = jsonData[item];
+            //     items.push(item.pair);
+            //     items.push(item.profit);
+            //     items.push(item.count);
+            // }
+
+            
+            if (!(items instanceof Array || typeof jsonData === 'undefined' || jsonData === 'null')) {
+                wrapper.innerHTML = "Awaiting Freqtrade data..";
+                return wrapper;
+            }
             console.log("items:" + items);
 
             items.forEach(element => 
@@ -71,10 +84,11 @@ Module.register("MMM-Freqtrade", {
 
         socketNotificationReceived: function (notification, payload) 
         {
-            if (notification === "MMM-Freqtrade_RESULT") 
+            if (notification === "MMM-Freqtrade_JSON_DATA") 
             {
-                this.jsonData = payload;
-                console.log(this.jsonData);
+                console.log("JSON DATA ARRIVED");
+                jsonData = payload.data;
+                console.log(jsonData);
                 this.updateDom(500);
             }
     
@@ -112,7 +126,7 @@ Module.register("MMM-Freqtrade", {
                 response.json().then((result) => {
                     this.result = result;
                     console.log(this.name + ": " + "Fetching Data for Category [" + `${this.config.freqtrade_category}` + "]");
-                    this.sendSocketNotification("MMM-Freqtrade_RESULT", this.result);
+                    this.sendSocketNotification("MMM-Freqtrade_RESULT", {data: this.result});
                 });
             });
         }

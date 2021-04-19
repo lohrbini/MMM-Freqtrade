@@ -13,6 +13,7 @@ module.exports = NodeHelper.create({
         if (notification === "MMM-Freqtrade_RESULT") 
         {
             this.jsonData = payload;
+            this.sendSocketNotification("MMM-Freqtrade_JSON_DATA", this.jsonData);
             console.log(this.jsonData);
         }
 
