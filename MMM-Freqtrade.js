@@ -34,22 +34,24 @@ Module.register("MMM-Freqtrade", {
             var table = document.createElement("table");
             var tbody = document.createElement("tbody");
 
-            var items = [];
+            // fill array with jsonData items
+            var items = [];           
+            for (var i = 0; i < jsonData.length; i++)
+            {
+                var object = jsonData[i];
+                for (var property in object)
+                {
+                    items.push(object[property]);
+                }
+            }
 
-            items = jsonData;
-
-            // for (item in jsonData) {
-            //     item = jsonData[item];
-            //     items.push(item.pair);
-            //     items.push(item.profit);
-            //     items.push(item.count);
-            // }
-
-            
+            // display "maintenance" if there is no data available
             if (!(items instanceof Array || typeof jsonData === 'undefined' || jsonData === 'null')) {
                 wrapper.innerHTML = "Awaiting Freqtrade data..";
                 return wrapper;
             }
+
+
             console.log("items:" + items);
 
             items.forEach(element => 
@@ -66,19 +68,13 @@ Module.register("MMM-Freqtrade", {
 
         getTableRow: function(jsonObject) 
         {
+            console.log("jsonObject:" + jsonObject)
+
             var row = document.createElement("tr");
-    
-            for (var key in jsonObject) {
-                var cell = document.createElement("td");
-                var valueToDisplay = "";
-                valueToDisplay = jsonObject[key];
-    
-                var cellText = document.createTextNode(valueToDisplay);
-                console.log("getTableRow:" + cellText );
-                cell.appendChild(cellText);
-                row.appendChild(cell);
-            }
-    
+            var cell = document.createElement("td");
+            var cellText = document.createTextNode(jsonObject)
+            cell.appendChild(cellText);
+            row.appendChild(cell);
             return row;
         },
 
