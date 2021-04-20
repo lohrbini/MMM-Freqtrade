@@ -3,7 +3,7 @@ var NodeHelper = require("node_helper")
 module.exports = NodeHelper.create({
 
 	start: function () {
-		console.log('MMM-JsonTable helper started...');
+		console.log('MMM-Freqtrade helper started...');
 	},
 
 	socketNotificationReceived: function (notification, payload) 

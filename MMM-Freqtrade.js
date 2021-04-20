@@ -26,30 +26,33 @@ Module.register("MMM-Freqtrade", {
 		var self = this;
 		setInterval(function () { self.getState(); }, this.config.fetchInterval);
         setInterval(function () { self.getToken() }, this.config.freqtrade_update_token);
-        setInterval(function() { self.updateDom()}, this.config.fetchInterval);
 	},
+
+    getStyles: function() {
+        return ["MMM-Freqtrade.css"];
+    },
 
     getDom: function()
         {
             var wrapper = document.createElement("div");
-            wrapper.className = "wrapper"
+            var tablerow, tabledata, table, tablecell;
+            wrapper.className = "xsmall"
             
-            var table = document.createElement('table');
-            var tablerow, tabledata;
-
-
-            var items = [];
+            table = document.createElement("table");
+            table.id = "MMM-Freqtrade"
+            
+            this.items = [];
             for (var i = 0; i < jsonData.length; i++)
             {
                 var object = jsonData[i];
                 for (var property in object)
                 {
-                    items.push(object[property]);
+                    this.items.push(object[property]);
                 }
             }
 
             // display "maintenance" if there is no data available
-            if (!(jsonData instanceof Array || typeof jsonData === 'undefined' || jsonData === 'null')) 
+            if (this.items.length === 0 ) 
             {
                 wrapper.innerHTML = "Awaiting Freqtrade data..";
                 return wrapper;
@@ -57,44 +60,52 @@ Module.register("MMM-Freqtrade", {
             // return the formatted data in a table
             else
             {
-                for (var i = 0; i <= items.length; i++) 
+
+                if (this.config.freqtrade_category === "performance")
                 {
-                    if(this.config.freqtrade_category === "performance")
+                    // create headlines
+                    var header = table.createTHead();
+                    var header_row = header.insertRow(0);
+                    var header_topic_0 = header_row.insertCell(0);
+                    var header_topic_1 = header_row.insertCell(0);
+                    var header_topic_2 = header_row.insertCell(0);
+                    header_topic_0.innerHTML = "Pair";
+                    header_topic_1.innerHTML = "Profit";
+                    header_topic_2.innerHTML = "Count";
+                    table.appendChild(header);
+
+                    for (var i = 0; i <= this.items.length; i++) 
                     {
                         if (i % 3 === 0)
                         {
                             tablerow = table.insertRow();
                         }
+                     
                         tabledata = tablerow.insertCell();
-                        tabledata.appendChild(document.createTextNode(items[i]));
+                        tabledata.appendChild(document.createTextNode(this.items[i]));
                     }
+
+                    wrapper.appendChild(table);
+                    return wrapper;
                 }
-                wrapper.appendChild(table);
-                return wrapper;
+                else if (this.config.freqtrade_category === "to_be_done")
+                {
+                    //to be done
+                }
+
+
+
             }
-        },
-
-
-        getTableRow: function(jsonObject) 
-        {
-            console.log("jsonObject:" + jsonObject)
-
-            var row = document.createElement("tr");
-            var cell = document.createElement("td");
-            var cellText = document.createTextNode(jsonObject)
-            cell.appendChild(cellText);
-            row.appendChild(cell);
-            return row;
         },
 
         socketNotificationReceived: function (notification, payload) 
         {
             if (notification === "MMM-Freqtrade_JSON_DATA") 
             {
-                console.log("JSON DATA ARRIVED");
+                Log.info("JSON DATA ARRIVED");
                 jsonData = payload.data;
-                console.log(jsonData);
-                this.updateDom(500);
+                Log.info(jsonData);
+                this.updateDom();
             }
     
         },
@@ -112,7 +123,7 @@ Module.register("MMM-Freqtrade", {
             }).then((response) => {
                 response.json().then((login_token) => {
                     this.login_token = login_token['access_token'];
-                    console.log(this.name + ": " + "Fetching Token");
+                    Log.info(this.name + ": " + "Fetching Token");
                     this.getState()
                 });
             });
@@ -130,7 +141,7 @@ Module.register("MMM-Freqtrade", {
             }).then((response) => {
                 response.json().then((result) => {
                     this.result = result;
-                    console.log(this.name + ": " + "Fetching Data for Category [" + `${this.config.freqtrade_category}` + "]");
+                    Log.info(this.name + ": " + "Fetching Data for Category [" + `${this.config.freqtrade_category}` + "]");
                     this.sendSocketNotification("MMM-Freqtrade_RESULT", {data: this.result});
                 });
             });
